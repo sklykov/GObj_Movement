@@ -9,7 +9,7 @@ classdef picWithObj2 < handle
     
     methods
         % constructor (all conditions)
-        function PicObj = picWithObj(B,Obj,x,y,pIn)
+        function PicObj = picWithObj2(B,Obj,x,y,pIn)
             PicObj.background = B; % should be class "Picture"
             PicObj.object = Obj; % should be class "GaussObj"
             PicObj.xC = int16(x); PicObj.yC = int16(y); % round the coordinate of object center
@@ -17,53 +17,67 @@ classdef picWithObj2 < handle
         end
     end
     
-    methods
-        % fuse object in background
-        function BObj=fuse(PicObj)
+    methods 
+        % check the ability to paint object (center of object lays inside
+        % the picture borders)
+        function PaintObj = paint(PicObj)
+            PaintObj = {};
             %% variables definition and assignment
-            int16 sizeP; int16 xAv; int16 yAv; int16 i1; int16 j1;
-            int16 xc; int16 yc; int16 xObj;
-            int16 xmin; int16 yimn; int16 xmax; int16 ymax;
             xc=PicObj.xC; yc=PicObj.yC;
             sizeP=PicObj.background.N; sizeP=int16(sizeP);
+            I1=PicObj.object.shape;
+            %% set limits to pixel values
+            xAv=(max(size(I1))-1)/2; yAv=xAv; yAv=int16(yAv); xAv=int16(xAv); % background - square
+            if (xc>=xAv)&&(xc<=sizeP-xAv)
+                xmin=xc-xAv; xmax=xc+xAv;
+            elseif (xc>=1)&&(xc<xAv)
+                xmin=1; xmax=xAv-xc;
+            elseif (xc<=sizeP)&&(xc>sizeP-xAv)
+                xmin=xc-xAv-sizeP; xmax=sizeP;
+            else
+                xmin=-1; xmax=0;
+            end
+            if (yc>=yAv)&&(yc<=sizeP-yAv)
+                ymin=yc-yAv; ymax=yc+yAv;
+            elseif (yc>=1)&&(yc<yAv)
+                ymin=1; ymax=yAv-yc;
+            elseif (yc<=sizeP)&&(yc>sizeP-yAv)
+                ymin=yc-yAv-sizeP; ymax=sizeP;
+            else
+                ymin=-1; ymax=0;
+            end
+            if (xmax>0)&&(ymax>0)&&(xmin>0)&&(ymin>0)
+                PaintObj{1} = true;
+            else PaintObj{1} = false;
+            end
+            PaintObj{2}=xmin; PaintObj{3}=xmax; PaintObj{4}=ymin; PaintObj{5}=ymax; 
+            PaintObj{6}=xAv; PaintObj{7}=yAv; PaintObj{8}=xc; PaintObj{9}=yc;
+        end
+    end
+    
+    methods
+        % fuse object in background after checking if it lays inside the
+        % picture borders)
+        function BObj=fuse(PicObj)
             I1=PicObj.object.shape;
             %% checking the iteration step
             if max(size(PicObj.picIN))~=max(size(PicObj.background.blank)) 
                 BObj=PicObj.background.blank;
             else BObj=PicObj.picIN;
             end
-            %% fuse object depending the coordinates of object center
-            xAv=(max(size(I1))-1)/2; yAv=xAv; yAv=int16(yAv); xAv=int16(xAv); % background - square
-            
-            if (xc>xAv)&&(xc<sizeP)
-                xmin=xc-xAv;
-            else xmin=-1;
-            end
-            if (yc>yAv)&&(yc<sizeP)
-                ymin=yc-yAv;
-            else ymin=-1;
-            end
-            if xc<sizeP-xAv
-                xmax=xc+xAv;
-            else xmax=0;
-            end
-            if yc<sizeP-xAv
-                ymax=yc+yAv;
-            else ymax=0;
-            end
-            
-            if (xmax>0)&&(ymax>0)&&(xmin>0)&&(ymin>0)
-                for i1=xmin:1:xmax
-                    for j1=ymin:1:ymax
-                        xObj=i1+(xAv-xc)+1;
-                        yObj=j1+(yAv-yc)+1;
+            %% assign pixel value
+            vals = PicObj.paint; % all vals indexed below are assigned above, maybe not optimal solution
+            if vals{1}
+                for i1=vals{2}:1:vals{3}
+                    for j1=vals{4}:1:vals{5}
+                        xObj=i1+(vals{6}-vals{8})+1;
+                        yObj=j1+(vals{7}-vals{9})+1;
                         if BObj(i1,j1)<255
                             BObj(i1,j1)=BObj(i1,j1)+I1(xObj,yObj);
                         end
                     end
                 end
-            end
-            
+            end 
             BObj=cast(BObj,'uint8');
         end
     end
