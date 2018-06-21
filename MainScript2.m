@@ -13,18 +13,18 @@ PO1 = picWithObj(P1,G1,xC1,yC1,0);
 BI1=PO1.fuse;
 PO1 = picWithObj(P1,G1,xC2,yC2,BI1);
 BI1=PO1.fuse; 
-imwrite(BI1,'1.png'); 
+% imwrite(BI1,'1.png'); 
 iter=2; xC1 = xC1 + 2*sigma; yC2 = yC2 + 2*sigma;
-while xC1<=picSize-3*sigma
-    BI2=0;
-    PO2 = picWithObj(P1,G1,xC1,yC1,BI2);
-    BI2=PO2.fuse;
-    PO2 = picWithObj(P1,G1,xC2,yC2,BI2);
-    BI2=PO2.fuse;
-    name=strcat(num2str(iter),'.png');
-    imwrite(BI2,name);
-    xC1 = xC1 + 2*sigma;
-    yC2 = yC2 + 2*sigma;
-    iter=iter+1;
-end
+% while xC1<=picSize-3*sigma
+%     BI2=0;
+%     PO2 = picWithObj(P1,G1,xC1,yC1,BI2);
+%     BI2=PO2.fuse;
+%     PO2 = picWithObj(P1,G1,xC2,yC2,BI2);
+%     BI2=PO2.fuse;
+%     name=strcat(num2str(iter),'.png');
+% %     imwrite(BI2,name);
+%     xC1 = xC1 + 2*sigma;
+%     yC2 = yC2 + 2*sigma;
+%     iter=iter+1;
+% end
 
