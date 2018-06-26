@@ -17,9 +17,10 @@ classdef picWithObj2 < handle
         end
     end
     
-    methods 
+    methods
         % check the ability to paint object (center of object lays inside
         % the picture borders)
+        %% 
         function PaintObj = paint(PicObj)
             PaintObj = {};
             %% variables definition and assignment
@@ -30,19 +31,19 @@ classdef picWithObj2 < handle
             xAv=(max(size(I1))-1)/2; yAv=xAv; yAv=int16(yAv); xAv=int16(xAv); % background - square
             if (xc>=xAv)&&(xc<=sizeP-xAv)
                 xmin=xc-xAv; xmax=xc+xAv;
-            elseif (xc>=1)&&(xc<xAv)
-                xmin=1; xmax=xAv-xc;
-            elseif (xc<=sizeP)&&(xc>sizeP-xAv)
-                xmin=xc-xAv-sizeP; xmax=sizeP;
+%             elseif (xc>=1)&&(xc<xAv)
+%                 xmin=1; xmax=xAv-xc;
+%             elseif (xc<=sizeP)&&(xc>sizeP-xAv)
+%                 xmin=xc-xAv-sizeP; xmax=sizeP;
             else
                 xmin=-1; xmax=0;
             end
             if (yc>=yAv)&&(yc<=sizeP-yAv)
                 ymin=yc-yAv; ymax=yc+yAv;
-            elseif (yc>=1)&&(yc<yAv)
-                ymin=1; ymax=yAv-yc;
-            elseif (yc<=sizeP)&&(yc>sizeP-yAv)
-                ymin=yc-yAv-sizeP; ymax=sizeP;
+%             elseif (yc>=1)&&(yc<yAv)
+%                 ymin=1; ymax=yAv-yc;
+%             elseif (yc<=sizeP)&&(yc>sizeP-yAv)
+%                 ymin=yc-yAv-sizeP; ymax=sizeP;
             else
                 ymin=-1; ymax=0;
             end
@@ -50,6 +51,7 @@ classdef picWithObj2 < handle
                 PaintObj{1} = true;
             else PaintObj{1} = false;
             end
+            %% assign values to tranfer them to other method
             PaintObj{2}=xmin; PaintObj{3}=xmax; PaintObj{4}=ymin; PaintObj{5}=ymax; 
             PaintObj{6}=xAv; PaintObj{7}=yAv; PaintObj{8}=xc; PaintObj{9}=yc;
         end
@@ -58,6 +60,7 @@ classdef picWithObj2 < handle
     methods
         % fuse object in background after checking if it lays inside the
         % picture borders)
+        %%
         function BObj=fuse(PicObj)
             I1=PicObj.object.shape;
             %% checking the iteration step
@@ -81,5 +84,18 @@ classdef picWithObj2 < handle
             BObj=cast(BObj,'uint8');
         end
     end
+    
+    methods
+        % move particle further linear, return center coordinates
+        %%
+        function lin=linear(PicObj,angle,speed)
+            lin=zeros(2,'double');
+            lin(1) = PicObj.xC+speed*cos(angle*pi/180);
+            lin(1) = cast(lin(1),'uint16');
+            lin(2) = PicObj.yC+speed*sin(angle*pi/180);
+            lin(2) = cast(lin(2),'uint16');
+        end
+    end
+    
 end
 
