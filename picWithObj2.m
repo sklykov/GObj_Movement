@@ -13,7 +13,7 @@ classdef picWithObj2 < handle
             PicObj.background = B; % should be class "Picture"
             PicObj.object = Obj; % should be class "GaussObj"
             PicObj.xC = int16(x); PicObj.yC = int16(y); % round the coordinate of object center
-            PicObj.picIN = pIn;
+            PicObj.picIN = pIn; % array = real picture
         end
     end
     
@@ -48,8 +48,8 @@ classdef picWithObj2 < handle
                 ymin=-1; ymax=0;
             end
             if (xmax>0)&&(ymax>0)&&(xmin>0)&&(ymin>0)
-                PaintObj{1} = true;
-            else PaintObj{1} = false;
+                PaintObj{1} = true; % flag is painting the object possible
+            else PaintObj{1} = false; % or not
             end
             %% assign values to tranfer them to other method
             PaintObj{2}=xmin; PaintObj{3}=xmax; PaintObj{4}=ymin; PaintObj{5}=ymax; 
@@ -61,7 +61,7 @@ classdef picWithObj2 < handle
         % fuse object in background after checking if it lays inside the
         % picture borders)
         %%
-        function BObj=fuse(PicObj)
+        function BObj=fuse(PicObj) % BObj = physical picture 
             I1=PicObj.object.shape;
             %% checking the iteration step
             if max(size(PicObj.picIN))~=max(size(PicObj.background.blank)) 
@@ -70,7 +70,7 @@ classdef picWithObj2 < handle
             end
             %% assign pixel value
             vals = PicObj.paint; % all vals indexed below are assigned above, maybe not optimal solution
-            if vals{1}
+            if vals{1} % this condition means that fusing possible for object with entered coordinates
                 for i1=vals{2}:1:vals{3}
                     for j1=vals{4}:1:vals{5}
                         xObj=i1+(vals{6}-vals{8})+1;
@@ -86,13 +86,14 @@ classdef picWithObj2 < handle
     end
     
     methods
-        % move particle further linear, return center coordinates
+        % move particle further linear, return center coordinates as (x,y)
+        % values
         %%
-        function lin=linear(PicObj,angle,speed)
+        function lin=linear(PicObj,angle,speed) % lin = (x,y)
             lin=zeros(2,'double');
-            lin(1) = PicObj.xC+speed*cos(angle*pi/180);
-            lin(1) = cast(lin(1),'uint16');
-            lin(2) = PicObj.yC+speed*sin(angle*pi/180);
+            lin(1) = PicObj.xC+speed*cos(angle*pi/180); % x
+            lin(1) = cast(lin(1),'uint16'); % round x
+            lin(2) = PicObj.yC+speed*sin(angle*pi/180); % y
             lin(2) = cast(lin(2),'uint16');
         end
     end

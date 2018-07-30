@@ -17,9 +17,10 @@ for i=1:1:NumbObj
 end
 
 %% creation sample of object
-G1 = GaussObj(sigma); P1 = Picture(picSize); % generate samples of objects
+G1 = GaussObj(sigma); P1 = Picture(picSize); % generate samples of relevant classes
 % I1 = G1.shape; B1 = P1.blank; % methods gives the generated objects
-BI1=0; 
+BI1=0; % here is absolutely empty picture containing 1 pixel
+PO(1:NumbObj)=picWithObj2(P1,G1,1,1,BI1); % create array of classes
 for i=1:1:NumbObj
     PO1 = picWithObj2(P1,G1,coord(2*i-1),coord(2*i),BI1); 
     BI1=PO1.fuse; % fuse objects in picture
@@ -30,9 +31,11 @@ iter=1;
 % imshow(BI1);
 
 %% create movie
-flag1=true; 
+flag1=true;  
 while flag1
-    BI2=P1.blank; l=0;
+    BI2=P1.blank; % generate blank picture
+    l=0; % after generation of each frame this value is used for checking of 
+    % presence of any "paintable" object
     for i=1:1:NumbObj
         xCyC=PO(i).linear(angles(i),speed);
         coord(2*i-1)=xCyC(1); coord(2*i)=xCyC(2);
