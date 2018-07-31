@@ -1,5 +1,6 @@
 classdef picWithObj2 < handle
     % fuse objects with picture
+    %% list of parameters
     properties
         background; % background picture as array
         object; % gaussian or other shape object
@@ -7,6 +8,7 @@ classdef picWithObj2 < handle
         picIN; % for making iterations
     end
     
+    %% constructor 
     methods
         % constructor (all conditions)
         function PicObj = picWithObj2(B,Obj,x,y,pIn)
@@ -17,12 +19,12 @@ classdef picWithObj2 < handle
         end
     end
     
+    %% paint method = define is the object able to be "painted"
     methods
         % check the ability to paint object (center of object lays inside
         % the picture borders)
-        %% 
         function PaintObj = paint(PicObj)
-            PaintObj = {};
+            PaintObj = {}; % structure array - array of any data type elements
             %% variables definition and assignment
             xc=PicObj.xC; yc=PicObj.yC;
             sizeP=PicObj.background.N; sizeP=int16(sizeP);
@@ -57,16 +59,16 @@ classdef picWithObj2 < handle
         end
     end
     
+    %% fuse object in picture method
     methods
         % fuse object in background after checking if it lays inside the
         % picture borders)
-        %%
         function BObj=fuse(PicObj) % BObj = physical picture 
-            I1=PicObj.object.shape;
+            I1=PicObj.object.shape; % gaussian object itself (generation)
             %% checking the iteration step
             if max(size(PicObj.picIN))~=max(size(PicObj.background.blank)) 
-                BObj=PicObj.background.blank;
-            else BObj=PicObj.picIN;
+                BObj=PicObj.background.blank; % initialize picture if the enter pic is empty
+            else BObj=PicObj.picIN; % enter pic - the aim for object fusing
             end
             %% assign pixel value
             vals = PicObj.paint; % all vals indexed below are assigned above, maybe not optimal solution
@@ -85,10 +87,10 @@ classdef picWithObj2 < handle
         end
     end
     
+    %% linear motion method
     methods
         % move particle further linear, return center coordinates as (x,y)
         % values
-        %%
         function lin=linear(PicObj,angle,speed) % lin = (x,y)
             lin=zeros(2,'double');
             lin(1) = PicObj.xC+speed*cos(angle*pi/180); % x

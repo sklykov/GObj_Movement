@@ -23,15 +23,14 @@ BI1=0; % here is absolutely empty picture containing 1 pixel
 PO(1:NumbObj)=picWithObj2(P1,G1,1,1,BI1); % create array of classes
 for i=1:1:NumbObj
     PO1 = picWithObj2(P1,G1,coord(2*i-1),coord(2*i),BI1); 
-    BI1=PO1.fuse; % fuse objects in picture
-    PO(i)=PO1;
+    BI1=PO1.fuse; % fuse objects in picture (1 picture with multiple objects)
+    PO(i)=PO1; % each object requires instance of class 
 end
 % imwrite(BI1,'1.png'); 
-iter=1; 
 % imshow(BI1);
 
 %% create movie
-flag1=true;  
+flag1=true; iter=1;   
 while flag1
     BI2=P1.blank; % generate blank picture
     l=0; % after generation of each frame this value is used for checking of 
@@ -42,7 +41,7 @@ while flag1
         PO(i) = picWithObj2(P1,G1,coord(2*i-1),coord(2*i),BI2);
         BI2=PO(i).fuse;
         c=PO(i).paint;
-        if c{1}
+        if c{1} % flag, true = still existing "paintable" object
             l=l+1;
         end
     end

@@ -1,10 +1,10 @@
 classdef GaussObj < handle
-    % attempt to transfer generation of Gaussian shape object to class
+    % transfering of generation of Gaussian shape object to class
     
     properties
         s; % sigma in Gaussian distribution
     end
-    % constructor
+    %% constructor
     methods 
         function GObj = GaussObj(sigma)
             if (nargin == 1)&(sigma>0)
@@ -13,7 +13,7 @@ classdef GaussObj < handle
             end  
         end
     end
-    
+    %% gaussian shape object
     methods
         function I = shape(GObj)
             int16 sn; int16 n; int16 av;  int16 i; int16 j;
