@@ -1,5 +1,5 @@
 classdef picWithObj3 < handle
-    % fuse objects with picture
+    % fuse objects with background picture
     %% list of parameters
     properties
         background; % background picture as array

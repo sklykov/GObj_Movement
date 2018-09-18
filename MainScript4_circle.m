@@ -2,11 +2,11 @@ clc; close all; clear variables;
 % Main script for generation of moving objects with Gaussian shapes  
 
 %% properties of objects
-sigma=15; % define size of Gaussian shape object
-picSize = 700; % define size of background picture
-NumbObj=2; % define number of objects
+sigma=5; % define size of Gaussian shape object
+picSize = 600; % define size of background picture
+NumbObj=5; % define number of objects
 coord = zeros(2*NumbObj,1,'uint16'); % initialize # of objects
-rad = NumbObj*sigma*8; radx=zeros(NumbObj,1,'uint16');
+rad = NumbObj*sigma*10; radx=zeros(NumbObj,1,'uint16');
 
 %% generation of disturbed objects
 for i=1:1:NumbObj
@@ -33,7 +33,7 @@ angle=0; iter=1;
 while angle<=90
     BI2=P1.blank; % generate blank picture
     for i=1:1:NumbObj
-         xCyC=PO1.circle(radx(i),angle);
+        xCyC=PO1.circle(radx(i),angle);
         coord(2*i)=xCyC(1)+picSize/2; 
         coord(2*i-1)=xCyC(2)+picSize/2;
         PO1 = picWithObj3(P1,G1,coord(2*i-1),coord(2*i),BI2);
@@ -42,5 +42,6 @@ while angle<=90
     name=strcat(num2str(iter),'.png');
     imwrite(BI2,name);
 %     figure; imshow(BI2);
-    angle=angle+10;iter=iter+1;
+    angle=angle+10; % angle of turning between frames 
+    iter=iter+1;
 end

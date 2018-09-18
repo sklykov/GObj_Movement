@@ -13,7 +13,7 @@ speed=14; % assign as pixels/frame for each object
 for i=1:1:NumbObj
     coord(2*i-1)=randi(picSize); % "x" coordinate
     coord(2*i)=randi(picSize); % "y" coordinate
-    angles(i)=randi(361)-1; % 
+    angles(i)=randi(361)-1; % angle of displacements counted from X axis
 end
 
 %% creation sample of object
@@ -39,8 +39,8 @@ while flag1
         xCyC=PO(i).linear(angles(i),speed);
         coord(2*i-1)=xCyC(1); coord(2*i)=xCyC(2);
         PO(i) = picWithObj2(P1,G1,coord(2*i-1),coord(2*i),BI2);
-        BI2=PO(i).fuse;
-        c=PO(i).paint;
+        BI2=PO(i).fuse; % draw the object
+        c=PO(i).paint; % paint - defying is the object could be introduced to picture
         if c{1} % flag, true = still existing "paintable" object
             l=l+1;
         end
