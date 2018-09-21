@@ -1,11 +1,11 @@
-classdef flObj < handle
+classdef flObj
     % New class for generation of "fluorescent object" as a class
     
     %% list of parameters related to the object
     properties
-        s; % obvious property
-        shape; % type of object shape
-        xc; yc; % coordinates of center
+        s; % obvious property - size
+        shape; % type of an object shape
+        xc; yc; % coordinates of a center
         id; % for distinguishing and controlling through ground truth simulation
     end
     
@@ -19,7 +19,7 @@ classdef flObj < handle
         end
     end
     
-    %% making a Gaussian shape
+    %% making or returning a Gaussian shape
     methods
         function I = gshape(flObj)
             if ((flObj.shape=='g')||(strcmp(flObj.shape,'gaussian')))
@@ -38,6 +38,46 @@ classdef flObj < handle
             I = uint8(I);
             end
         end    
+    end
+    
+    %% linear (without acceleration) displacement between frames
+    methods (Static) % method doesn't demand the sample of class "flObj"
+        function lin=linear(x,y,angle,speed)
+            lin=zeros(2,'double'); % returning modified coordinates (x,y)
+            lin(1) = x+speed*cos(angle*pi/180); % x
+            lin(1) = cast(lin(1),'uint16'); % round x
+            lin(2) = y+speed*sin(angle*pi/180); % y
+            lin(2) = cast(lin(2),'uint16'); % round y
+        end
+    end
+    %% generation of cirle movement (rotation of objects)
+    methods (Static)
+        % generate movement of objects on some cirle with predefined radius
+        function cir=circle(rad,angle) %cir = (x,y)
+            cir=zeros(2,'double'); 
+            cir(1) = rad*cos(angle*pi/180); % x
+            cir(1) = cast(cir(1),'uint16'); % round x
+            cir(2) = rad*sin(angle*pi/180); % y
+            cir(2) = cast(cir(2),'uint16'); % round y
+        end
+    end
+    %% generate curved trajectory 
+    %for generation it's assumed now that there exist two subpopulation of
+    %particles; displacement value between two frames and angle of such
+    %displacement are normally disturbed 
+    methods
+        function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2)
+            curvedXY=zeros(3,'double'); % returning modified coordinates (x,y) + angle (!) served later as mean
+            x=flObj.xc; y=flObj.yc;
+            if mod(flObj.id,2)==0
+                meanV=mean_vel1;
+            else meanV=mean_vel2;
+            end
+            displ=abs(normrnd(meanV,0.25*meanV)); % get normally disturbed displacement, 20% - dispersion from mean
+            angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
+            curvedXY=flObj.linear(x,y,angle,displ);
+            curvedXY(3)=angle;
+        end
     end
 end
 
