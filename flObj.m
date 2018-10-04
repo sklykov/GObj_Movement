@@ -21,6 +21,8 @@ classdef flObj
     
     %% making or returning a Gaussian shape
     methods
+        % this method returned the gaussian shaped object with central
+        % intensity equal to maximal white value in 8-bit image ("255")
         function I = gshape(flObj)
             if ((flObj.shape=='g')||(strcmp(flObj.shape,'gaussian')))
             int16 sn; int16 n; int16 av;  int16 i; int16 j;
@@ -61,13 +63,13 @@ classdef flObj
             cir(2) = cast(cir(2),'uint16'); % round y
         end
     end
-    %% generate curved trajectory 
-    %for generation it's assumed now that there exist two subpopulation of
-    %particles; displacement value between two frames and angle of such
-    %displacement are normally disturbed 
+    %% generate curved trajectory
     methods
+        %for generation it's assumed now that there exist two subpopulation of
+        %particles; displacement value between two frames and angle of such
+        %displacement are normally disturbed 
         function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2)
-            curvedXY=zeros(3,'double'); % returning modified coordinates (x,y) + angle (!) served later as mean
+            curvedXY=zeros(3,'double'); %#ok<*PREALL> % returning modified coordinates (x,y) + angle (!) served later as mean
             x=flObj.xc; y=flObj.yc;
             if mod(flObj.id,2)==0
                 meanV=mean_vel1;
@@ -77,6 +79,25 @@ classdef flObj
             angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
             curvedXY=flObj.linear(x,y,angle,displ);
             curvedXY(3)=angle;
+        end
+    end
+    %% object appearance event (with some threshold probability for each frame)
+    methods (Static)
+        function ap = appear(objects,thresholdV,picSize)
+                if isa(objects(1),'flObj')&&(~isempty(objects)) % check all conditions
+                    if rand<thresholdV
+                        N=size(objects,1); % last index in objects array
+                        sizeObj = objects(N).s; shapeObj=objects(N).shape; shapeObj=char(shapeObj);
+                        addObj=flObj(sizeObj,shapeObj,1,1,1); % create new fluorescent object
+%                         angle=randi(361)-1; % initial angle of displacement counted from X axis
+                        addObj.id=objects(N).id+1; % enumeration of objects = giving them id
+                        addObj.xc=randi(picSize); % "x" coordinate
+                        addObj.yc=randi(picSize); % "y" coordinate
+                        ap=cat(1,objects,addObj); % append to array created object
+                    else ap=objects; % return input array of object if new one didn't appear
+                    end
+                else error('not proper input')
+                end
         end
     end
 end
