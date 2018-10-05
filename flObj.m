@@ -94,11 +94,25 @@ classdef flObj
                         addObj.xc=randi(picSize); % "x" coordinate
                         addObj.yc=randi(picSize); % "y" coordinate
                         ap=cat(1,objects,addObj); % append to array created object
-                    else ap=objects; % return input array of object if new one didn't appear
+                    else ap=objects; % return input array containing objects if new one didn't appear
                     end
                 else error('not proper input')
                 end
         end
     end
+    %% object disappearance (suddenly)
+    methods (Static)
+        function dis=disappear(objects,index,thresholdV)
+            if isa(objects(1),'flObj')&&(~isempty(objects)) % check all conditions
+                    if rand<thresholdV
+                       objects(index)=[];
+                       dis=objects;
+                    else dis=objects; % return input array of object if current one didn't disappear
+                    end
+                else error('not proper input')
+            end
+        end
+    end
+    
 end
 
