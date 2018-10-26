@@ -1,7 +1,7 @@
 clc; close all; clear variables; 
 % Main script for generation of moving objects with Gaussian shapes. This
-% version generates randomly allocated objects going divided to two
-% different subpopulations (two velocities) + angles with gaussian
+% version generates randomly allocated objects divided to two
+% different subpopulations (according to defined two velocities) + angles with gaussian
 % distributions
 %% properties of objects
 sigma=4; % define size of Gaussian shape object

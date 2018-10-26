@@ -29,10 +29,10 @@ for i=1:1:NumbObj
     Pic = PO.fuse();
 end
 name=strcat(num2str(1),'.png'); % making a name in format "1.png"
-imwrite(Pic,name); % save picture with an initial distribution
+% imwrite(Pic,name); % save picture with an initial distribution
 % figure; imshow(Pic);
 %% drawing remained frames (initial_#_frames - 1)
-iter=2; %counter of frames
+iter=2; % counter of frames
 thresholdApp=0.1; % probability of object appearance
 thresholdDis=0.005; % probability of object disappearance
 
@@ -89,10 +89,9 @@ while iter<=NumbFrames
         NumbObj = size(objects,1); 
     end
     if l>0
-        name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
-        imwrite(Pic,name); % saving the generated frame with objects
+%         name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
+%         imwrite(Pic,name); % saving the generated frame with objects
 %         figure; imshow(Pic);
     end
     iter=iter+1;
-    
 end

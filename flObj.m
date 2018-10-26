@@ -1,11 +1,13 @@
 classdef flObj
-    % New class for generation of "fluorescent object" as a class
+    % Generation of "fluorescent object" with attributes like size (in
+    % pixels), shape (Gaussian, ...), coordinates of a center, id
     
     %% list of parameters related to the object
     properties
-        s; % obvious property - size
-        shape; % type of an object shape
-        xc; yc; % coordinates of a center
+        s; % size in pixels
+        shape; % type of an object shape (now - only Gaussian simulated)
+        xc; % 'X' coordinate of the particle center
+        yc; % 'Y' coordinate of the particle center
         id; % for distinguishing and controlling through ground truth simulation
     end
     
@@ -84,12 +86,11 @@ classdef flObj
     %% object appearance event (with some threshold probability for each frame)
     methods (Static)
         function ap = appear(objects,thresholdV,picSize)
-                if isa(objects(1),'flObj')&&(~isempty(objects)) % check all conditions
+                if isa(objects(1),'flObj')&&(~isempty(objects)) % check the type of array class and array size
                     if rand<thresholdV
                         N=size(objects,1); % last index in objects array
                         sizeObj = objects(N).s; shapeObj=objects(N).shape; shapeObj=char(shapeObj);
                         addObj=flObj(sizeObj,shapeObj,1,1,1); % create new fluorescent object
-%                         angle=randi(361)-1; % initial angle of displacement counted from X axis
                         addObj.id=objects(N).id+1; % enumeration of objects = giving them id
                         addObj.xc=randi(picSize); % "x" coordinate
                         addObj.yc=randi(picSize); % "y" coordinate
