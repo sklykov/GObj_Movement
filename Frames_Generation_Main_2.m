@@ -25,9 +25,13 @@ name=strcat(num2str(1),'.png'); % making the picture name in format "1.png"
 %% drawing remained frames (initial_#_of_frames - 1)
 iter=2; % counter of frames
 thApp=1; % probability of object appearance
+thDis=1; % probability of object disappearance 
 thresholdDis=0.005; % probability of object disappearance
 obArr.emerge(thApp,picSize);
-obArr.update()
+obArr.emerge(thApp,picSize);
+obArr.disappear(thDis,21);
+obArr.curvedDispl(5,8,16,0.25); % calculation of displacements
+% obArr.updateStat()
 % obArr.arrayObjs
 
 % while iter<=NumbFrames
@@ -35,29 +39,6 @@ obArr.update()
 %     l=0; % counter
 %     %% object appearance (only single for the frame - "the sudden object appearance")
 %     NumbObj = size(objects,1);
-%     objects=objects(1).appear(objects,thresholdApp,picSize); % appearing event of particle
-%     if size(objects,1)-NumbObj>0 % checking if new object has been generated at the previous step
-%             addAngle=randi(361)-1; % generate initial angle of displacement for newly generated object
-%             angles=cat(1,angles,addAngle); % adding the generated angle to the array
-%     end
-%     %% object disappearance (may happens for any of objects with predefined probability)
-%     % if object has disappeared, then a new object could appear with
-%     % probability 0.9 for compensation of decreasing objects density
-%     i=1; % counter
-%     while i<=size(objects,1)
-%         NObj=size(objects,1);
-%         objects=objects(i).disappear(objects,i,thresholdDis);
-%         if size(objects,1)-NObj<0 % checking if new object has been generated at the previous step
-%             angles(i)=[]; % removing corresponded angle
-%             NObj=size(objects,1);
-%             objects=objects(1).appear(objects,0.9,picSize); % appearing event of particle
-%             if size(objects,1)-NObj>0 % checking if new object has been generated at the previous step
-%                 addAngle=randi(361)-1; % generate initial angle of displacement for newly generated object
-%                 angles=cat(1,angles,addAngle); % adding the generated angle to the array
-%             end
-%         else i=i+1;
-%         end
-%     end
 %     %% drawing of objects (incl. appeared)
 %     NumbObj = size(objects,1); i=1; % counter
 %     while i<=size(objects,1)

@@ -10,7 +10,7 @@ sigma=5; % define size of Gaussian shape object through defining std
 picSize = 1000; % define size of background picture (related to density of objects in picture)
 NumbObj=80; % define number of objects (related to density of objects in picture)
 sigma_angle = 10; % sigma(std) in gaussian distribution of possible displacement angle (curvature)
-NumbFrames=50; % # of frames for movie generation
+NumbFrames=4; % # of frames for movie generation
 
 %% generation of random disturbed objects through the picture (initial)
 angles = zeros(NumbObj,1,'double'); % preallocation of angles
@@ -29,8 +29,8 @@ for i=1:1:NumbObj
     Pic = PO.fuse();
 end
 name=strcat(num2str(1),'.png'); % making a name in format "1.png"
-% imwrite(Pic,name); % save picture with an initial distribution
-% figure; imshow(Pic);
+imwrite(Pic,name); % save picture with an initial distribution
+figure; imshow(Pic);
 %% drawing remained frames (initial_#_frames - 1)
 iter=2; % counter of frames
 thresholdApp=0.1; % probability of object appearance
@@ -89,8 +89,8 @@ while iter<=NumbFrames
         NumbObj = size(objects,1); 
     end
     if l>0
-%         name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
-%         imwrite(Pic,name); % saving the generated frame with objects
+        name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
+        imwrite(Pic,name); % saving the generated frame with objects
 %         figure; imshow(Pic);
     end
     iter=iter+1;

@@ -70,17 +70,21 @@ classdef flObj
         %for generation it's assumed now that there exist two subpopulation of
         %particles; displacement value between two frames and angle of such
         %displacement are normally disturbed 
-        function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2)
-            curvedXY=zeros(3,'double'); %#ok<*PREALL> % returning modified coordinates (x,y) + angle (!) served later as mean
-            x=flObj.xc; y=flObj.yc;
+        function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2,disp_vel)
+            x=flObj.xc; y=flObj.yc; % get previous coordinates of points
+            angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
             if mod(flObj.id,2)==0
                 meanV=mean_vel1;
             else meanV=mean_vel2;
             end
-            displ=abs(normrnd(meanV,0.25*meanV)); % get normally disturbed displacement, 20% - dispersion from mean
-            angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
-            curvedXY=flObj.linear(x,y,angle,displ);
-            curvedXY(3)=angle;
+            if nargin == 5 % despersion of velocity predifend in this case
+                displ=abs(normrnd(meanV,0.25*meanV)); % get normally disturbed displacement, 20% - dispersion from mean
+                curvedXY=flObj.linear(x,y,angle,displ);
+            else
+                displ=abs(normrnd(meanV,disp_vel*meanV)); % get normally disturbed displacement, 20% - dispersion from mean
+                curvedXY=flObj.linear(x,y,angle,displ);
+            end
+            curvedXY(3)=angle; 
         end
     end
     %% object appearance event (with some threshold probability for each frame)

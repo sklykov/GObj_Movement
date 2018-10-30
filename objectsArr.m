@@ -6,12 +6,11 @@ classdef objectsArr < handle
     properties
         amount; 
         angles; 
-        meanInstV;
         trackL;
         object;
         arrayObjs;
-        crossings;
         displacements;
+        coordinates;
     end
     
     %% constructor
@@ -55,8 +54,15 @@ classdef objectsArr < handle
     %% initialize statistics calculation
     methods
         function []=instat(objectsArr,Pic) % seems that empty matrix [] plays the role of void function
-            if size(Pic)>1 % just 1st frame isn't empty
-                objectsArr.trackL=ones(size(objectsArr.arrayObjs)); % all tracks obtain the length "1"
+            dimension=size(Pic); % just quick workaround to access row numbers in the array
+            if (dimension(1)>1)&&(objectsArr.amount>0) % just 1st frame isn't empty & instances of objects already generated
+                objectsArr.trackL=zeros(objectsArr.amount,1,'uint16'); % assign zero length to all tracks
+                objectsArr.displacements=zeros(objectsArr.amount,1); % all displacements are zero
+%                 objectsArr.coordinates=zeros(2,objectsArr.amount); % all coordinates are zero
+%                 for j=1:1:objectsArr.amount
+%                     objectsArr.coordinates(1,j)=objectsArr.arrayObjs(j).xc; % save firstly "x" coordinates
+%                     objectsArr.coordinates(2,j)=objectsArr.arrayObjs(j).yc; % after it - "y" coordinates
+%                 end
             end
         end
     end
@@ -66,26 +72,55 @@ classdef objectsArr < handle
         function em = emerge(objectsArr,threshold,picSize)
             if rand<threshold
                 N=size(objectsArr.arrayObjs,1); % last index in objects array
-                sizeObj = objectsArr.arrayObjs(N).s; shapeObj=objectsArr.arrayObjs(N).shape; 
+                sizeObj = objectsArr.arrayObjs(N).s; shapeObj=objectsArr.arrayObjs(N).shape; % get object properties
                 shapeObj=char(shapeObj); addObj=flObj(sizeObj,shapeObj,1,1,1); % create new fluorescent object
                 addObj.id=objectsArr.arrayObjs(N).id+1; % enumeration of objects
                 addObj.xc=randi(picSize); addObj.yc=randi(picSize); % x,y coordinates
                 objectsArr.arrayObjs=cat(1,objectsArr.arrayObjs,addObj); % append to array created object
+                addAngle=randi(361)-1; % randomly create new angle
+                objectsArr.angles=cat(1,objectsArr.angles,addAngle); % append new angle
+                objectsArr.amount=objectsArr.amount+1; % amount ++
+                objectsArr.trackL=cat(1,objectsArr.trackL,0); % initialize track length recording for new track
+                %objectsArr.displacements=cat(1,objectsArr.displacements,0); % new recording of particle displacements
+%                 dimen1 = size(objectsArr.coordinates,1); newCoord=zeros(dimen1,1); % intialize empty subarray for storing coordinates
+%                 objectsArr.coordinates=cat(2,objectsArr.coordinates,newCoord); % append this empty array
+%                 dimen2 = size(objectsArr.coordinates,2);
                 em=true; % flag shows that new object have appeared in the frame
             end
         end
     end
     
-    %% update objects attributes after object appearance
+    %% disappearance of object
     methods
-        function [] = update(objectsArr) % [] - again instead of void function
-            if (objectsArr.amount-size(objectsArr.arrayObjs,1))<0 % this 
-                addAngle=randi(361)-1; % randomly create new angle
-                objectsArr.angles=cat(1,objectsArr.angles,addAngle); % append new angle
-                objectsArr.trackL=cat(1,objectsArr.trackL,1); % initialize track length
-                objectsArr.amount=objectsArr.amount+1;
+        function [] = disappear(objectsArr,threshold,index)
+            if rand<threshold
+%                 objectsArr.arrayObjs(index)=[]; % deletion of object(i) from the array
+%                 objectsArr.angles(index)=[]; % deletion of related angle
+%                 objectsArr.amount=objectsArr.amount-1; % amount --
+%                 dis = objectsArr; % return of instance of class "objects array" 
+                objectsArr.arrayObjs(index).id = -1; % label such disappeared objects
             end
         end
     end
+      
+    %% generate curved motion (update coordinates)
+    % method for generation of curved motion and immideately statistics
+    % update 
+    methods
+        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel)
+            for i=1:1:objectsArr.amount
+                if (objectsArr.arrayObjs(i).id > 0) % activate only for presented objects
+                   objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks
+                   x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates
+                   xCyC=objectsArr.arrayObjs(i).curved(objectsArr.angles(i),sigma_angles,mean_vel1,mean_vel2,disp_vel);
+                   dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
+                   objectsArr.displacements(i)=dR;
+                   objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2);
+                end
+            end
+            curv=objectsArr;
+        end
+    end
+    
 end
 
