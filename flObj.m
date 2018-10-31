@@ -47,7 +47,7 @@ classdef flObj
     %% linear (without acceleration) displacement between frames
     methods (Static) % method doesn't demand the sample of class "flObj"
         function lin=linear(x,y,angle,speed)
-            lin=zeros(2,'double'); % returning modified coordinates (x,y)
+            lin=zeros(2,1,'double'); % returning modified coordinates (x,y)
             lin(1) = x+speed*cos(angle*pi/180); % x
             lin(1) = cast(lin(1),'uint16'); % round x
             lin(2) = y+speed*sin(angle*pi/180); % y
@@ -71,6 +71,7 @@ classdef flObj
         %particles; displacement value between two frames and angle of such
         %displacement are normally disturbed 
         function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2,disp_vel)
+            curvedXY=zeros(3,1,'double'); % predefine the return values
             x=flObj.xc; y=flObj.yc; % get previous coordinates of points
             angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
             if mod(flObj.id,2)==0

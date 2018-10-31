@@ -51,6 +51,20 @@ classdef objectsArr < handle
         end
     end
     
+    %% draw objects in a frame (depending on their id)
+    methods
+        function drawn = drawFrame(objectsArr,Background)
+            Picture=0; % picture with 1 zero pixel initialization 
+            for i=1:1:objectsArr.amount
+                if objectsArr.arrayObjs(i).id > 0 % check if the current object isn't labelled
+                    PO = picWithObj4(Background,objectsArr.arrayObjs(i),Picture); % instance of class "picWithObj4"
+                    Picture=PO.fuse(); % draw object
+                end
+            end
+            drawn=Picture; 
+        end
+    end
+    
     %% initialize statistics calculation
     methods
         function []=instat(objectsArr,Pic) % seems that empty matrix [] plays the role of void function
@@ -75,13 +89,27 @@ classdef objectsArr < handle
                 sizeObj = objectsArr.arrayObjs(N).s; shapeObj=objectsArr.arrayObjs(N).shape; % get object properties
                 shapeObj=char(shapeObj); addObj=flObj(sizeObj,shapeObj,1,1,1); % create new fluorescent object
                 addObj.id=objectsArr.arrayObjs(N).id+1; % enumeration of objects
-                addObj.xc=randi(picSize); addObj.yc=randi(picSize); % x,y coordinates
+                xc=randi(picSize); yc=randi(picSize); % x,y coordinates
+                xAv=(objectsArr.arrayObjs(1).s-1)/2; 
+                if xc<xAv % checking generated values and correct them 
+                    xc=xAv+4; % to be sure that generated objects obtain normal coordinates 
+                elseif xc>picSize-xAv %(conditions here and below)
+                    xc=picSize-xAv-4;
+                end
+                if yc<xAv
+                    yc=xAv+4;
+                elseif yc>picSize-xAv
+                    yc=picSize-xAv-4;
+                end
+                addObj.xc=xc; addObj.yc=yc; % assign corrected values
                 objectsArr.arrayObjs=cat(1,objectsArr.arrayObjs,addObj); % append to array created object
                 addAngle=randi(361)-1; % randomly create new angle
                 objectsArr.angles=cat(1,objectsArr.angles,addAngle); % append new angle
                 objectsArr.amount=objectsArr.amount+1; % amount ++
                 objectsArr.trackL=cat(1,objectsArr.trackL,0); % initialize track length recording for new track
-                %objectsArr.displacements=cat(1,objectsArr.displacements,0); % new recording of particle displacements
+                [nRows,nColumns]=size(objectsArr.displacements); % get number of columns
+                newRow=zeros(1,nColumns); clear('nRows');
+                objectsArr.displacements=cat(1,objectsArr.displacements,newRow); % new recording of particle displacements
 %                 dimen1 = size(objectsArr.coordinates,1); newCoord=zeros(dimen1,1); % intialize empty subarray for storing coordinates
 %                 objectsArr.coordinates=cat(2,objectsArr.coordinates,newCoord); % append this empty array
 %                 dimen2 = size(objectsArr.coordinates,2);
@@ -107,18 +135,38 @@ classdef objectsArr < handle
     % method for generation of curved motion and immideately statistics
     % update 
     methods
-        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel)
+        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel,BckGr,Pic,nFrame)
+            excl=0; % counter of excluded objects from further drawing (becomes out of borders)
+            if nFrame>2
+                N=size(objectsArr.displacements,1); % get number of rows in the related column
+                newCol=zeros(N,1); % initialize the column with zeros
+                objectsArr.displacements=cat(2,objectsArr.displacements,newCol); % append the initilized column
+            end
             for i=1:1:objectsArr.amount
                 if (objectsArr.arrayObjs(i).id > 0) % activate only for presented objects
                    objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks
                    x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates
                    xCyC=objectsArr.arrayObjs(i).curved(objectsArr.angles(i),sigma_angles,mean_vel1,mean_vel2,disp_vel);
-                   dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
-                   objectsArr.displacements(i)=dR;
-                   objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2);
+                   objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2); % save assigned coordinates
+                   PO = picWithObj4(BckGr,objectsArr.arrayObjs(i),Pic); % instance of class "picWithObj4"
+                   c = PO.paint(); % define if objects stays in the frame limits
+                   if c{1} % checking there appears object
+                       dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
+                       if nFrame==2 % for the second frame  
+                           objectsArr.displacements(i)=dR; % save calculated Euclidian displacements
+                       else objectsArr.displacements(i,nFrame-1)=dR;
+                       end
+                   else excl=excl+1;
+                       objectsArr.arrayObjs(i).id = -1; % assign id for exclusion 
+                   end
                 end
             end
-            curv=objectsArr;
+            i1=0; % counter
+            while i1<excl % loop for generation the objects with high probability instead of disappeared
+                objectsArr.emerge(0.95,BckGr.N); % appearance of object with 0.95 probability
+                i1=i1+1;
+            end
+            curv=objectsArr; % return new instance of "objects array" class
         end
     end
     
