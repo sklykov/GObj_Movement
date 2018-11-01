@@ -19,7 +19,7 @@ obArr.arrayGen(picSize); % initialize randomly allocated objects
 Pic=obArr.drawFirst(BckGr); % create first frame
 obArr.instat(Pic); % initialization of statistics counting
 name=strcat(num2str(1),'.png'); % making the picture name in format "1.png"
-imwrite(Pic,name); % save picture with an initial distribution
+% imwrite(Pic,name); % save picture with an initial distribution
 % figure; imshow(Pic);
 
 %% drawing remained frames (initial_#_of_frames - 1)
@@ -39,8 +39,9 @@ while iter<=NumbFrames
     Pic=obArr.drawFrame(BckGr); % draw objects in pictures
     if size(Pic,1)>0
         name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
-        imwrite(Pic,name); % saving the generated frame with objects
+%         imwrite(Pic,name); % saving the generated frame with objects
 %         figure; imshow(Pic);
     end
     iter=iter+1;
 end
+obArr.saveReport(); % save dynamic properties

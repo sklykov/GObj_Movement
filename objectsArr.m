@@ -151,6 +151,7 @@ classdef objectsArr < handle
                    PO = picWithObj4(BckGr,objectsArr.arrayObjs(i),Pic); % instance of class "picWithObj4"
                    c = PO.paint(); % define if objects stays in the frame limits
                    if c{1} % checking there appears object
+                       x=cast(x,'double'); y=cast(y,'double'); 
                        dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
                        if nFrame==2 % for the second frame  
                            objectsArr.displacements(i)=dR; % save calculated Euclidian displacements
@@ -167,6 +168,66 @@ classdef objectsArr < handle
                 i1=i1+1;
             end
             curv=objectsArr; % return new instance of "objects array" class
+        end
+    end
+    
+    %% make the report and save it in the active directory
+    % for recording of the dynamic parameters 
+    methods
+        function []=saveReport(objectsArr)
+            % tableData = array2table(objectsArr.trackL); % conver array to a table
+            % writetable(tableData,'track_Lentghts.csv'); % save this table
+            %% excluding tracks with zero length and save only not zero ones
+            nRows=size(objectsArr.trackL,1); i=1;
+            while i<=nRows
+                if objectsArr.trackL(i)>0
+                    i=i+1;
+                else objectsArr.trackL(i)=[];
+                    nRows=size(objectsArr.trackL,1);
+                end
+            end
+            csvwrite('track_Lentghts.csv',objectsArr.trackL); % directly save csv file
+            %% averaging of displacements in rows
+            [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
+            avInstant=zeros(nRows,1,'double');
+            for i=1:1:nRows
+                sum=0; n=0; % initial values
+                for j=1:1:nCols
+                    if objectsArr.displacements(i,j)>0 % checking elements
+                        sum=sum+objectsArr.displacements(i,j); % summarize
+                        n=n+1;
+                    end
+                end
+                if n>0
+                    avInstant(i,1)=sum/n; % average displacement along a track
+                end
+            end
+            i=1;
+            while i<=nRows
+                if avInstant(i,1)>0
+                   i=i+1;
+                else avInstant(i)=[];
+                    nRows=size(avInstant,1);
+                end
+            end
+            csvwrite('Mean_Instant_Vels.csv',avInstant); % directly save csv file
+            clear('avInstant'); % clear allocated variable
+            %% collect all instant 
+            [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
+            nSize=nRows*nCols; % size of overall array
+            overInst=zeros(nSize,1,'double'); % intialize the array for collecting displacements
+            n=1;
+            for i=1:1:nRows
+                for j=1:1:nCols
+                    if objectsArr.displacements(i,j)>0 % checking elements
+                       overInst(n,1)=objectsArr.displacements(i,j); % saving not zero value
+                       n=n+1; 
+                    end
+                end
+            end
+            overInst=overInst(1:n-1,1); % delete all zero elements
+            csvwrite('All_Instant_Vels.csv',overInst); % save all instant velocities in 1 array
+            clear('overInst'); % clear variable
         end
     end
     
