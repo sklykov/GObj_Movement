@@ -7,10 +7,13 @@ clc; close all; clear variables;
 % objects and collecting related statistics
 %% properties of objects
 sigma=5; % define size of Gaussian shape object through defining std
-picSize = 1000; % define size of background picture (related to density of objects in picture)
+picSize=1000; % define size of background picture (related to density of objects in picture)
 NumbObj=100; % define number of objects (related to density of objects in picture)
-sigma_angle = 10; % sigma(std) in gaussian distribution of possible displacement angle (curvature)
+sigma_angle=5; % sigma(std) in gaussian distribution of possible displacement angle (curvature)
 NumbFrames=100; % # of frames for movie generation
+Vel1=sigma*2; % mean velocity of first subpopulation of moving objects
+Vel2=sigma*4; % mean velocity of second subpopulation of moving objects
+disp_vel=0.25; % set the dispersion coefficient (mean_velocity*dispersion_coefficient)
 
 %% initialization of the entry data
 BckGr=Picture(picSize); % initialize the instance of class "Picture" 
@@ -19,7 +22,7 @@ obArr.arrayGen(picSize); % initialize randomly allocated objects
 Pic=obArr.drawFirst(BckGr); % create first frame
 obArr.instat(Pic); % initialization of statistics counting
 name=strcat(num2str(1),'.png'); % making the picture name in format "1.png"
-% imwrite(Pic,name); % save picture with an initial distribution
+imwrite(Pic,name); % save picture with an initial distribution
 % figure; imshow(Pic);
 
 %% drawing remained frames (initial_#_of_frames - 1)
@@ -35,11 +38,11 @@ while iter<=NumbFrames
     for i=1:1:obArr.amount
         obArr.disappear(thDis,i); % suddenly object disappearance
     end
-    obArr.curvedDispl(10,15,30,0.25,BckGr,Pic,iter); % calculation of displacements
+    obArr.curvedDispl(sigma_angle,Vel1,Vel2,disp_vel,BckGr,Pic,iter); % calculation of displacements
     Pic=obArr.drawFrame(BckGr); % draw objects in pictures
     if size(Pic,1)>0
         name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
-%         imwrite(Pic,name); % saving the generated frame with objects
+        imwrite(Pic,name); % saving the generated frame with objects
 %         figure; imshow(Pic);
     end
     iter=iter+1;

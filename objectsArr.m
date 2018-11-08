@@ -148,6 +148,7 @@ classdef objectsArr < handle
                    x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates
                    xCyC=objectsArr.arrayObjs(i).curved(objectsArr.angles(i),sigma_angles,mean_vel1,mean_vel2,disp_vel);
                    objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2); % save assigned coordinates
+                   objectsArr.angles(i)=xCyC(3); % modify angle of movement
                    PO = picWithObj4(BckGr,objectsArr.arrayObjs(i),Pic); % instance of class "picWithObj4"
                    c = PO.paint(); % define if objects stays in the frame limits
                    if c{1} % checking there appears object
@@ -175,8 +176,6 @@ classdef objectsArr < handle
     % for recording of the dynamic parameters 
     methods
         function []=saveReport(objectsArr)
-            % tableData = array2table(objectsArr.trackL); % conver array to a table
-            % writetable(tableData,'track_Lentghts.csv'); % save this table
             %% excluding tracks with zero length and save only not zero ones
             nRows=size(objectsArr.trackL,1); i=1;
             while i<=nRows
@@ -186,7 +185,7 @@ classdef objectsArr < handle
                     nRows=size(objectsArr.trackL,1);
                 end
             end
-            csvwrite('track_Lentghts.csv',objectsArr.trackL); % directly save csv file
+            xlswrite('Track_Lentghts.xls',objectsArr.trackL); % directly save csv file
             %% averaging of displacements in rows
             [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
             avInstant=zeros(nRows,1,'double');
@@ -210,7 +209,7 @@ classdef objectsArr < handle
                     nRows=size(avInstant,1);
                 end
             end
-            csvwrite('Mean_Instant_Vels.csv',avInstant); % directly save csv file
+            xlswrite('Mean_Instant_Vels.xls',avInstant); % xls file... proprietary format... but working! 
             clear('avInstant'); % clear allocated variable
             %% collect all instant 
             [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
@@ -226,7 +225,8 @@ classdef objectsArr < handle
                 end
             end
             overInst=overInst(1:n-1,1); % delete all zero elements
-            csvwrite('All_Instant_Vels.csv',overInst); % save all instant velocities in 1 array
+%             csvwrite('All_Instant_Vels.csv',overInst); % save all instant velocities in 1 array
+            xlswrite('All_Instant_Vels.xls',overInst); % honestly, better compatibility with delimeters issues
             clear('overInst'); % clear variable
         end
     end
