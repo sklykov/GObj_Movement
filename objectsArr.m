@@ -88,7 +88,8 @@ classdef objectsArr < handle
                 N=size(objectsArr.arrayObjs,1); % last index in objects array
                 sizeObj = objectsArr.arrayObjs(N).s; shapeObj=objectsArr.arrayObjs(N).shape; % get object properties
                 shapeObj=char(shapeObj); addObj=flObj(sizeObj,shapeObj,1,1,1); % create new fluorescent object
-                addObj.id=objectsArr.arrayObjs(N).id+1; % enumeration of objects
+                addObj.id=N+1; % enumeration of objects (corrected)
+                addObj.id
                 xc=randi(picSize); yc=randi(picSize); % x,y coordinates
                 xAv=(objectsArr.arrayObjs(1).s-1)/2; 
                 if xc<xAv % checking generated values and correct them 
@@ -107,7 +108,7 @@ classdef objectsArr < handle
                 objectsArr.angles=cat(1,objectsArr.angles,addAngle); % append new angle
                 objectsArr.amount=objectsArr.amount+1; % amount ++
                 objectsArr.trackL=cat(1,objectsArr.trackL,0); % initialize track length recording for new track
-                [nRows,nColumns]=size(objectsArr.displacements); % get number of columns
+                [~,nColumns]=size(objectsArr.displacements); % get number of columns, ~ - instead of unused value
                 newRow=zeros(1,nColumns); clear('nRows');
                 objectsArr.displacements=cat(1,objectsArr.displacements,newRow); % new recording of particle displacements
 %                 dimen1 = size(objectsArr.coordinates,1); newCoord=zeros(dimen1,1); % intialize empty subarray for storing coordinates
