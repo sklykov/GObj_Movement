@@ -186,7 +186,7 @@ classdef objectsArr < handle
                     nRows=size(objectsArr.trackL,1);
                 end
             end
-            xlswrite('Track_Lentghts.xls',objectsArr.trackL); % directly save csv file
+            xlswrite('Track_Lengths_GR.xls',objectsArr.trackL); % directly save csv file
             %% averaging of displacements in rows
             [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
             avInstant=zeros(nRows,1,'double');
@@ -210,7 +210,7 @@ classdef objectsArr < handle
                     nRows=size(avInstant,1);
                 end
             end
-            xlswrite('Mean_Instant_Vels.xls',avInstant); % xls file... proprietary format... but working! 
+            xlswrite('Mean_Instant_Vels_GR.xls',avInstant); % xls file... proprietary format... but working! 
             clear('avInstant'); % clear allocated variable
             %% collect all instant 
             [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
@@ -227,7 +227,7 @@ classdef objectsArr < handle
             end
             overInst=overInst(1:n-1,1); % delete all zero elements
 %             csvwrite('All_Instant_Vels.csv',overInst); % save all instant velocities in 1 array
-            xlswrite('All_Instant_Vels.xls',overInst); % honestly, better compatibility with delimeters issues
+            xlswrite('All_Instant_Vels_GR.xls',overInst); % honestly, better compatibility with delimeters issues
             clear('overInst'); % clear variable
         end
     end
