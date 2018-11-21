@@ -44,7 +44,9 @@ classdef flObj
         end    
     end
     
-    %% linear (without acceleration) displacement between frames
+    %% linear (without acceleration) displacement between frames 
+    % this method used also for connection the particles centers between
+    % frames
     methods (Static) % method doesn't demand the sample of class "flObj"
         function lin=linear(x,y,angle,speed)
             lin=zeros(2,1,'double'); % returning modified coordinates (x,y)
@@ -72,7 +74,7 @@ classdef flObj
         %displacement are normally disturbed 
         function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2,disp_vel)
             curvedXY=zeros(3,1,'double'); % predefine the return values
-            x=flObj.xc; y=flObj.yc; % get previous coordinates of points
+            x=flObj.xc; y=flObj.yc; % get previous coordinates of object
             angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
             if mod(flObj.id,2)==0
                 meanV=mean_vel1;
@@ -86,6 +88,27 @@ classdef flObj
                 curvedXY=flObj.linear(x,y,angle,displ);
             end
             curvedXY(3)=angle; 
+        end
+    end
+    %% generate the halt event (e.g. in an actin-reach (?) region) - 
+    % the dRmax limits the maximal displacement, angle and displacement
+    % becomes quasi-random (using built-in function), 0<=angle<=359
+    % degrees; 0<=dR(frame-to-frame)<=dRmax
+    methods
+        function halt = halt(flObj,dRmax)
+            x=flObj.xc; y=flObj.yc; % get previous coordinates of object
+            dx=rand*sqrt(dRmax); dy=rand*sqrt(dRmax); % get displacements along X and Y axis
+            probe1=rand; probe2=rand; % two times create "heads and tails" probe for defyining the sign of displacements
+            if probe1 <= 0.5 % defyining the sign of "X" displacement
+                sign1=1; 
+            else sign1=-1; 
+            end
+            if probe2 <= 0.5 % defyining the sign of "Y" displacement
+                sign2=1;
+            else sign2=-1;
+            end
+            flObj.xc=x+sign1*dx; flObj.yc=y+sign2*dy; % assign new coordinates for an object
+            halt=flObj; % explicitly return modified sample of object because of object type
         end
     end
     %% object appearance event (with some threshold probability for each frame)
