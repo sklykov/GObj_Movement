@@ -35,7 +35,7 @@ classdef objectsArr < handle
                     arrayRand(i).yc=randi(picSize); % assign the random Y coordinate
                 end
                 objectsArr.arrayObjs=arrayRand; % transfer generated array to class properties
-            else warning('specify behaviour for other input class')   
+            else warning('input class isnt specified')   
             end          
         end
     end
@@ -56,7 +56,7 @@ classdef objectsArr < handle
         function drawn = drawFrame(objectsArr,Background)
             Picture=0; % picture with 1 zero pixel initialization 
             for i=1:1:objectsArr.amount
-                if objectsArr.arrayObjs(i).id > 0 % check if the current object isn't labelled
+                if objectsArr.arrayObjs(i).id ~= -1 % check if the current object isn't labelled with id "-1"
                     PO = picWithObj4(Background,objectsArr.arrayObjs(i),Picture); % instance of class "picWithObj4"
                     Picture=PO.fuse(); % draw object
                 end
@@ -72,11 +72,6 @@ classdef objectsArr < handle
             if (dimension(1)>1)&&(objectsArr.amount>0) % just 1st frame isn't empty & instances of objects already generated
                 objectsArr.trackL=zeros(objectsArr.amount,1,'uint16'); % assign zero length to all tracks
                 objectsArr.displacements=zeros(objectsArr.amount,1); % all displacements are zero
-%                 objectsArr.coordinates=zeros(2,objectsArr.amount); % all coordinates are zero
-%                 for j=1:1:objectsArr.amount
-%                     objectsArr.coordinates(1,j)=objectsArr.arrayObjs(j).xc; % save firstly "x" coordinates
-%                     objectsArr.coordinates(2,j)=objectsArr.arrayObjs(j).yc; % after it - "y" coordinates
-%                 end
             end
         end
     end
@@ -89,16 +84,15 @@ classdef objectsArr < handle
                 sizeObj = objectsArr.arrayObjs(N).s; shapeObj=objectsArr.arrayObjs(N).shape; % get object properties
                 shapeObj=char(shapeObj); addObj=flObj(sizeObj,shapeObj,1,1,1); % create new fluorescent object
                 addObj.id=N+1; % enumeration of objects (corrected)
-                addObj.id
                 xc=randi(picSize); yc=randi(picSize); % x,y coordinates
                 xAv=(objectsArr.arrayObjs(1).s-1)/2; 
                 if xc<xAv % checking generated values and correct them 
                     xc=xAv+4; % to be sure that generated objects obtain normal coordinates 
                 elseif xc>picSize-xAv %(conditions here and below)
-                    xc=picSize-xAv-4;
+                    xc=picSize-xAv-4; % correction of coordinates
                 end
                 if yc<xAv
-                    yc=xAv+4;
+                    yc=xAv+4; % same -for "y" coordinate
                 elseif yc>picSize-xAv
                     yc=picSize-xAv-4;
                 end
@@ -106,14 +100,11 @@ classdef objectsArr < handle
                 objectsArr.arrayObjs=cat(1,objectsArr.arrayObjs,addObj); % append to array created object
                 addAngle=randi(361)-1; % randomly create new angle
                 objectsArr.angles=cat(1,objectsArr.angles,addAngle); % append new angle
-                objectsArr.amount=objectsArr.amount+1; % amount ++
+                objectsArr.amount=objectsArr.amount+1; % amount of objects ++
                 objectsArr.trackL=cat(1,objectsArr.trackL,0); % initialize track length recording for new track
                 [~,nColumns]=size(objectsArr.displacements); % get number of columns, ~ - instead of unused value
-                newRow=zeros(1,nColumns); clear('nRows');
+                newRow=zeros(1,nColumns); % initialize place for new object
                 objectsArr.displacements=cat(1,objectsArr.displacements,newRow); % new recording of particle displacements
-%                 dimen1 = size(objectsArr.coordinates,1); newCoord=zeros(dimen1,1); % intialize empty subarray for storing coordinates
-%                 objectsArr.coordinates=cat(2,objectsArr.coordinates,newCoord); % append this empty array
-%                 dimen2 = size(objectsArr.coordinates,2);
                 em=true; % flag shows that new object have appeared in the frame
             end
         end
@@ -123,11 +114,25 @@ classdef objectsArr < handle
     methods
         function [] = disappear(objectsArr,threshold,index)
             if rand<threshold
-%                 objectsArr.arrayObjs(index)=[]; % deletion of object(i) from the array
-%                 objectsArr.angles(index)=[]; % deletion of related angle
-%                 objectsArr.amount=objectsArr.amount-1; % amount --
-%                 dis = objectsArr; % return of instance of class "objects array" 
-                objectsArr.arrayObjs(index).id = -1; % label such disappeared objects
+                objectsArr.arrayObjs(index).id = -1; % label such disappeared objects with id "-1"
+            end
+        end
+    end
+    
+    %% stopping moving
+    methods
+        function [] = stopping(objectsArr,threshold,index)
+            if rand<threshold
+                objectsArr.arrayObjs(index).id = -2; % label the halted object in a "hot spot" with id "-2"
+            end
+        end
+    end
+    
+    %% recovering of moving (after stopping)
+    methods
+        function [] = recover(objectsArr,threshold,index)
+            if (rand<threshold)&&(objectsArr.arrayObjs(index).id == -2)
+                objectsArr.arrayObjs(index).id = index; % recover moving behavior of object
             end
         end
     end
@@ -144,24 +149,43 @@ classdef objectsArr < handle
                 objectsArr.displacements=cat(2,objectsArr.displacements,newCol); % append the initilized column
             end
             for i=1:1:objectsArr.amount
+                %% object moving with curved trajectory
                 if (objectsArr.arrayObjs(i).id > 0) % activate only for presented objects
-                   objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks
-                   x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates
-                   xCyC=objectsArr.arrayObjs(i).curved(objectsArr.angles(i),sigma_angles,mean_vel1,mean_vel2,disp_vel);
-                   objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2); % save assigned coordinates
+                   x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates in the previous frame
+                   xCyC=objectsArr.arrayObjs(i).curved(objectsArr.angles(i),sigma_angles,mean_vel1,mean_vel2,disp_vel); % generate new coordinates
+                   objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2); % save generated coordinates
                    objectsArr.angles(i)=xCyC(3); % modify angle of movement
                    PO = picWithObj4(BckGr,objectsArr.arrayObjs(i),Pic); % instance of class "picWithObj4"
                    c = PO.paint(); % define if objects stays in the frame limits
                    if c{1} % checking there appears object
-                       x=cast(x,'double'); y=cast(y,'double'); 
+                       x=cast(x,'double'); y=cast(y,'double'); % round the coordinates
                        dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
+                       objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks (CORRECTED!)
                        if nFrame==2 % for the second frame  
                            objectsArr.displacements(i)=dR; % save calculated Euclidian displacements
-                       else objectsArr.displacements(i,nFrame-1)=dR;
+                       else objectsArr.displacements(i,nFrame-1)=dR; % again save in next columns
                        end
                    else excl=excl+1;
                        objectsArr.arrayObjs(i).id = -1; % assign id for exclusion 
                    end
+                %% stopped object (with random walk as dynamic behavior) 
+                elseif (objectsArr.arrayObjs(i).id == -2) % stopped object - specify dynamics
+                    x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates in the previous frame
+                    dRmax = 1; % stopped object can moves within near 1 pixel minimum (in future will be moved)
+                    xCyC = objectsArr.arrayObjs(i).halt(dRmax); % generation of a pair of new coordinates
+                    objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2); % assign coordinates
+                    PO = picWithObj4(BckGr,objectsArr.arrayObjs(i),Pic); % instance of class "picWithObj4"
+                    c = PO.paint(); % define if objects stays in the frame limits
+                    if c{1} % checking there appears object
+                       x=cast(x,'double'); y=cast(y,'double'); % round the coordinates
+                       dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
+                       objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks (CORRECTED!)
+                       if nFrame==2 % for the second frame  
+                           objectsArr.displacements(i)=dR; % save calculated Euclidian displacements
+                       else objectsArr.displacements(i,nFrame-1)=dR; % again save in next columns
+                       end
+                    else objectsArr.arrayObjs(i).id = -1; % assign id for exclusion the disappeared object 
+                    end
                 end
             end
             i1=0; % counter
@@ -177,24 +201,26 @@ classdef objectsArr < handle
     % for recording of the dynamic parameters 
     methods
         function []=saveReport(objectsArr)
-            %% excluding tracks with zero length and save only not zero ones
+            %% excluding tracks with length less than 2 frames and correct related displacements
             nRows=size(objectsArr.trackL,1); i=1;
             while i<=nRows
-                if objectsArr.trackL(i)>0
+                if objectsArr.trackL(i)>2
                     i=i+1;
-                else objectsArr.trackL(i)=[];
-                    nRows=size(objectsArr.trackL,1);
+                else objectsArr.trackL(i)=[]; % delete track length less than 2
+                    objectsArr.displacements(i,:)=[]; % delete according displacements
+                    nRows=size(objectsArr.trackL,1); % refresh # of rows
                 end
             end
-            xlswrite('Track_Lengths_GR.xls',objectsArr.trackL); % directly save csv file
+            xlswrite('Track_Lengths_GR.xls',objectsArr.trackL); % directly save xls file with lengths
+%             xlswrite('Displacements_in_Cols.xls',objectsArr.displacements); % save displacements in columns for each track (row) 
             %% averaging of displacements in rows
             [nRows,nCols]=size(objectsArr.displacements); % get # rows and columns
-            avInstant=zeros(nRows,1,'double');
+            avInstant=zeros(nRows,1,'double'); % initialization of values
             for i=1:1:nRows
                 sum=0; n=0; % initial values
                 for j=1:1:nCols
                     if objectsArr.displacements(i,j)>0 % checking elements
-                        sum=sum+objectsArr.displacements(i,j); % summarize
+                        sum=sum+objectsArr.displacements(i,j); % get the sum of all displacement along a track
                         n=n+1;
                     end
                 end
@@ -206,8 +232,8 @@ classdef objectsArr < handle
             while i<=nRows
                 if avInstant(i,1)>0
                    i=i+1;
-                else avInstant(i)=[];
-                    nRows=size(avInstant,1);
+                else avInstant(i)=[]; % exclude zero speeds from the array
+                    nRows=size(avInstant,1); % update the number of elements in the array
                 end
             end
             xlswrite('Mean_Instant_Vels_GR.xls',avInstant); % xls file... proprietary format... but working! 
@@ -226,7 +252,6 @@ classdef objectsArr < handle
                 end
             end
             overInst=overInst(1:n-1,1); % delete all zero elements
-%             csvwrite('All_Instant_Vels.csv',overInst); % save all instant velocities in 1 array
             xlswrite('All_Instant_Vels_GR.xls',overInst); % honestly, better compatibility with delimeters issues
             clear('overInst'); % clear variable
         end

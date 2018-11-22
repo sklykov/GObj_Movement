@@ -7,7 +7,7 @@ classdef GaussObj < handle
     %% constructor
     methods 
         function GObj = GaussObj(sigma)
-            if (nargin == 1)&(sigma>0)
+            if (nargin == 1)&&(sigma>0)
                 GObj.s = sigma;
             else warning('incorrect initiation of Gaussian shape object')
             end  

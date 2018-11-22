@@ -72,8 +72,8 @@ classdef flObj
         %for generation it's assumed now that there exist two subpopulation of
         %particles; displacement value between two frames and angle of such
         %displacement are normally disturbed 
-        function curvedXY= curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2,disp_vel)
-            curvedXY=zeros(3,1,'double'); % predefine the return values
+        function curvedXY=curved(flObj,init_angle,sigma_angles,mean_vel1,mean_vel2,disp_vel)
+%             curvedXY=zeros(3,1,'double'); % predefine the returning values
             x=flObj.xc; y=flObj.yc; % get previous coordinates of object
             angle=normrnd(init_angle,sigma_angles); % get normally disturbed angle, 5 degree - dispersion
             if mod(flObj.id,2)==0
@@ -107,8 +107,7 @@ classdef flObj
                 sign2=1;
             else sign2=-1;
             end
-            flObj.xc=x+sign1*dx; flObj.yc=y+sign2*dy; % assign new coordinates for an object
-            halt=flObj; % explicitly return modified sample of object because of object type
+            halt(1)=x+sign1*dx; halt(2)=y+sign2*dy; % round x,y; send them as output 
         end
     end
     %% object appearance event (with some threshold probability for each frame)
