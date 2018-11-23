@@ -130,9 +130,20 @@ classdef objectsArr < handle
     
     %% recovering of moving (after stopping)
     methods
-        function [] = recover(objectsArr,threshold,index)
-            if (rand<threshold)&&(objectsArr.arrayObjs(index).id == -2)
-                objectsArr.arrayObjs(index).id = index; % recover moving behavior of object
+        function [] = recover(objectsArr,threshold,index,nFrame,dRmax)
+            if (objectsArr.arrayObjs(index).id == -2) % object stopped
+                i=nFrame-2; c=1; % c - counter  
+                while i>0
+                    if objectsArr.displacements(index,i)<=dRmax % previous displacement is also from stack moving
+                        c=c+1; % c++
+                        i=i-1; % step back
+                    else i=0; % end "while" cycle
+                    end
+                end
+                threshold=exp((c-1)^2)*threshold; % increase the probability of continue to move 
+                if rand<threshold
+                    objectsArr.arrayObjs(index).id = index; % recover moving behavior of object
+                end
             end
         end
     end

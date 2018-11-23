@@ -26,8 +26,8 @@ imwrite(Pic,name); % save picture with an initial distribution
 % figure; imshow(Pic);
 
 %% properties for handling dynamical events connected with objects
-thApp=0.1; % probability of object appearance
-thDis=1E-3; % probability of object disappearance 
+thApp=0.05; % probability of object appearance
+thDis=1E-2; % probability of object disappearance 
 thHalt=0.02; % probability of object stopping (halting)
 thRec=1E-3; % probability of object continue moving after pause (stopping event)
 
@@ -41,7 +41,7 @@ while iter<=NumbFrames
     for i=1:1:obArr.amount
         obArr.disappear(thDis,i); % suddenly object disappearance
         obArr.stopping(thHalt,i); % object is stopped in some region (docked to something, trapped somewhere)
-        obArr.recover(thHalt*0.8,i); % recovering of object moving (now with constant probability)
+        obArr.recover(thHalt*0.8,i,iter,0.99); % recovering of object moving (now with constant probability)
     end
     obArr.curvedDispl(sigma_angle,Vel1,Vel2,disp_vel,BckGr,Pic,iter); % calculation of displacements - curved motion
     Pic=obArr.drawFrame(BckGr); % draw objects in pictures
