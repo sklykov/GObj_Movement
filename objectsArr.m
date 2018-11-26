@@ -140,7 +140,7 @@ classdef objectsArr < handle
                     else i=0; % end "while" cycle
                     end
                 end
-                threshold=exp((c-1)^2)*threshold; % increase the probability of continue to move 
+                threshold=exp(c)*threshold; % increase the probability of continuing to move 
                 if rand<threshold
                     objectsArr.arrayObjs(index).id = index; % recover moving behavior of object
                 end
@@ -152,7 +152,7 @@ classdef objectsArr < handle
     % method for generation of curved motion and immideately statistics
     % update 
     methods
-        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel,BckGr,Pic,nFrame)
+        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel,BckGr,Pic,nFrame,dRmax)
             excl=0; % counter of excluded objects from further drawing (becomes out of borders)
             if nFrame>2
                 N=size(objectsArr.displacements,1); % get number of rows in the related column
@@ -171,9 +171,9 @@ classdef objectsArr < handle
                    if c{1} % checking there appears object
                        x=cast(x,'double'); y=cast(y,'double'); % round the coordinates
                        dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
-                       objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks (CORRECTED!)
+                       objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks
                        if nFrame==2 % for the second frame  
-                           objectsArr.displacements(i)=dR; % save calculated Euclidian displacements
+                           objectsArr.displacements(i,1)=dR; % save calculated Euclidian displacements
                        else objectsArr.displacements(i,nFrame-1)=dR; % again save in next columns
                        end
                    else excl=excl+1;
@@ -182,7 +182,6 @@ classdef objectsArr < handle
                 %% stopped object (with random walk as dynamic behavior) 
                 elseif (objectsArr.arrayObjs(i).id == -2) % stopped object - specify dynamics
                     x=objectsArr.arrayObjs(i).xc; y=objectsArr.arrayObjs(i).yc; % get coordinates in the previous frame
-                    dRmax = 1; % stopped object can moves within near 1 pixel minimum (in future will be moved)
                     xCyC = objectsArr.arrayObjs(i).halt(dRmax); % generation of a pair of new coordinates
                     objectsArr.arrayObjs(i).xc=xCyC(1); objectsArr.arrayObjs(i).yc=xCyC(2); % assign coordinates
                     PO = picWithObj4(BckGr,objectsArr.arrayObjs(i),Pic); % instance of class "picWithObj4"
@@ -190,9 +189,9 @@ classdef objectsArr < handle
                     if c{1} % checking there appears object
                        x=cast(x,'double'); y=cast(y,'double'); % round the coordinates
                        dR=sqrt((x-xCyC(1))^2+((y-xCyC(2))^2)); % calculation of Euclidian displacement
-                       objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks (CORRECTED!)
+                       objectsArr.trackL(i)=objectsArr.trackL(i)+1; % update the length of tracks 
                        if nFrame==2 % for the second frame  
-                           objectsArr.displacements(i)=dR; % save calculated Euclidian displacements
+                           objectsArr.displacements(i,1)=dR; % save calculated Euclidian displacements
                        else objectsArr.displacements(i,nFrame-1)=dR; % again save in next columns
                        end
                     else objectsArr.arrayObjs(i).id = -1; % assign id for exclusion the disappeared object 
@@ -211,7 +210,7 @@ classdef objectsArr < handle
     %% make the report and save it in the active directory
     % for recording of the dynamic parameters 
     methods
-        function []=saveReport(objectsArr)
+        function []=saveReport(objectsArr,dRmax)
             %% excluding tracks with length less than 2 frames and correct related displacements
             nRows=size(objectsArr.trackL,1); i=1;
             while i<=nRows
@@ -230,7 +229,7 @@ classdef objectsArr < handle
             for i=1:1:nRows
                 sum=0; n=0; % initial values
                 for j=1:1:nCols
-                    if objectsArr.displacements(i,j)>0 % checking elements
+                    if (objectsArr.displacements(i,j)>0)&&(objectsArr.displacements(i,j)>dRmax*1.05) % checking the displacements for proper calculation
                         sum=sum+objectsArr.displacements(i,j); % get the sum of all displacement along a track
                         n=n+1;
                     end
@@ -256,7 +255,7 @@ classdef objectsArr < handle
             n=1;
             for i=1:1:nRows
                 for j=1:1:nCols
-                    if objectsArr.displacements(i,j)>0 % checking elements
+                    if (objectsArr.displacements(i,j)>0)&&(objectsArr.displacements(i,j)>dRmax*1.05) % checking the displacements
                        overInst(n,1)=objectsArr.displacements(i,j); % saving not zero value
                        n=n+1; 
                     end

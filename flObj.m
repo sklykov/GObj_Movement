@@ -82,10 +82,10 @@ classdef flObj
             end
             if nargin == 5 % despersion of velocity predifend in this case
                 displ=abs(normrnd(meanV,0.25*meanV)); % get normally disturbed displacement, 20% - dispersion from mean
-                curvedXY=flObj.linear(x,y,angle,displ);
-            else
-                displ=abs(normrnd(meanV,disp_vel*meanV)); % get normally disturbed displacement, 20% - dispersion from mean
-                curvedXY=flObj.linear(x,y,angle,displ);
+                curvedXY=flObj.linear(x,y,angle,displ); % return the coordinates after Euclidian dist. calc. 
+            elseif nargin == 6 % another definition of dispersion (see details below)
+                displ=abs(normrnd(meanV,disp_vel*mean_vel1)); % returns normal distr. vel with equal dispersion for both velocities
+                curvedXY=flObj.linear(x,y,angle,displ); % moreover, disp_vel = % of 1st mean velocity
             end
             curvedXY(3)=angle; 
         end
@@ -97,7 +97,8 @@ classdef flObj
     methods
         function halt = halt(flObj,dRmax)
             x=flObj.xc; y=flObj.yc; % get previous coordinates of object
-            dx=rand*sqrt(dRmax); dy=rand*sqrt(dRmax); % get displacements along X and Y axis
+            dx=rand*dRmax; % define displacement along X axis
+            dy=rand*sqrt((dRmax^2)-(dx^2)); % keep the generated displacement along Y axis within circle with dRmax radius
             probe1=rand; probe2=rand; % two times create "heads and tails" probe for defyining the sign of displacements
             if probe1 <= 0.5 % defyining the sign of "X" displacement
                 sign1=1; 
