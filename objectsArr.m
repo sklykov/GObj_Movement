@@ -140,7 +140,7 @@ classdef objectsArr < handle
                     else i=0; % end "while" cycle
                     end
                 end
-                threshold=exp(c)*threshold; % increase the probability of continuing to move 
+                threshold=exp(c-1)*threshold; % increase the probability of continuing to move 
                 if rand<threshold
                     objectsArr.arrayObjs(index).id = index; % recover moving behavior of object
                 end
@@ -152,8 +152,8 @@ classdef objectsArr < handle
     % method for generation of curved motion and immideately statistics
     % update 
     methods
-        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel,BckGr,Pic,nFrame,dRmax)
-            excl=0; % counter of excluded objects from further drawing (becomes out of borders)
+        function curv = curvedDispl(objectsArr,sigma_angles,mean_vel1,mean_vel2,disp_vel,BckGr,Pic,nFrame,dRmax,nObjects)
+            excl=0; % counter of excluded objects from further drawing (such objects have gone out of borders)
             if nFrame>2
                 N=size(objectsArr.displacements,1); % get number of rows in the related column
                 newCol=zeros(N,1); % initialize the column with zeros
@@ -176,7 +176,7 @@ classdef objectsArr < handle
                            objectsArr.displacements(i,1)=dR; % save calculated Euclidian displacements
                        else objectsArr.displacements(i,nFrame-1)=dR; % again save in next columns
                        end
-                   else excl=excl+1;
+                   else excl=excl+1; % count how many objects has gone out of frame
                        objectsArr.arrayObjs(i).id = -1; % assign id for exclusion 
                    end
                 %% stopped object (with random walk as dynamic behavior) 
@@ -197,11 +197,19 @@ classdef objectsArr < handle
                     else objectsArr.arrayObjs(i).id = -1; % assign id for exclusion the disappeared object 
                     end
                 end
+            end  
+            nPresentObj=0; % counter of currently presented objects in a frame
+            for i=1:1:objectsArr.amount % count the presented objects in frame (stopped and moving)
+                if (objectsArr.arrayObjs(i).id > 0)||(objectsArr.arrayObjs(i).id == -2)
+                    nPresentObj=nPresentObj+1; % counter ++
+                end
             end
-            i1=0; % counter
-            while i1<excl % loop for generation the objects with high probability instead of disappeared
-                objectsArr.emerge(0.95,BckGr.N); % appearance of object with 0.95 probability
-                i1=i1+1;
+            i1=0; % counter for number of objects for recovering
+            if ((nPresentObj-excl)<nObjects*1.05) % the condition preventing of creation of many additional objects
+                while i1<excl % loop for generation the objects with high probability instead of disappeared
+                    objectsArr.emerge(0.95,BckGr.N); % appearance of object with 0.95 probability
+                    i1=i1+1;
+                end
             end
             curv=objectsArr; % return new instance of "objects array" class
         end

@@ -14,8 +14,8 @@ sigma_angle=20; % sigma(std) in gaussian distribution of possible displacement a
 NumbFrames=100; % # of frames for movie generation
 Vel1=sigma*2; % mean velocity of first subpopulation of moving objects
 Vel2=sigma*3; % mean velocity of second subpopulation of moving objects
-disp_vel=0.2; % set the dispersion coefficient in the equation (mean_velocity*dispersion_coefficient)
-dRmax=0.1; % maximal displacement for oscillating movements ("halting or stopping or stacking") 
+disp_vel=0.25; % set the dispersion coefficient in the equation (mean_velocity*dispersion_coefficient)
+dRmax=1; % maximal displacement for oscillating movements ("halting or stopping or stacking") 
 
 %% initialization of the entry data
 BckGr=Picture(picSize); % initialize the instance of class "Picture" 
@@ -28,10 +28,10 @@ imwrite(Pic,name); % save picture with an initial distribution
 % figure; imshow(Pic);
 
 %% properties for handling dynamical events connected with objects
-thApp=1E-2; % probability of object appearance
-thDis=2E-3; % probability of object disappearance 
-thHalt=-1; % probability of object stopping (halting)
-thRec=1E-3; % probability of object continue moving after pause (stopping event)
+thApp=1E-4; % probability of object appearance
+thDis=3E-3; % probability of object disappearance 
+thHalt=0.04; % probability of object stopping (halting)
+thRec=1E-2; % probability of object continue moving after pause (stopping event)
 
 %% drawing remained frames (initial_#_of_frames - 1)
 iter=2; % counter of frames
@@ -45,7 +45,7 @@ while iter<=NumbFrames
         obArr.stopping(thHalt,i); % object is stopped in some region (docked to something, trapped somewhere)
         obArr.recover(thRec,i,iter,dRmax); % recovering of object moving (now with constant probability)
     end
-    obArr.curvedDispl(sigma_angle,Vel1,Vel2,disp_vel,BckGr,Pic,iter,dRmax); % calculation of displacements - curved motion
+    obArr.curvedDispl(sigma_angle,Vel1,Vel2,disp_vel,BckGr,Pic,iter,dRmax,NumbObj); % calculation of displacements - curved motion
     Pic=obArr.drawFrame(BckGr); % draw objects in pictures
     if size(Pic,1)>0
         name=strcat(num2str(iter),'.png'); % creation of name with format "1.png"
